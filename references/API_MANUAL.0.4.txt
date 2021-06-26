@@ -1,0 +1,581 @@
+API Manual Ver 0.4
+
+News: (2017-01-01)
+* Changed limit to 1000 for free users, contributions are doubled ( implemented a while ago ) so if you add 1 book you get 4 books and other edits 2.
+* Changed the requess from 25 to 100 per request.
+* Vip to 50k
+* API user. (250k Contact me for that)
+
+News: (2011-01-02)
+* Changed the way you access images! To lessen the load on the server.
+* Spell fixes.... well at least some :P
+
+
+This is a fast and simple API manual for the DB. I will fill it out on peoples request on how to use the API system  it's my first time I have ever written an API, neither have I ever used 
+
+one so :P This will be a bit on trial basic with the community who use it :P.
+
+First of, to get STARTED with the API for now, you need to contact me by EMAIL to get an API key, when the system is no longer in BETA I will open up so everyone can generate there own KEYS 
+
+and use the API freely.
+
+First of the LIMITATIONS:
+Queries to the db: 50+(1x Item Submission + 0,5x For every other contribution) per DAY. ( server is set to GMT+1 time )
+This is to limit the server load and contribute users to actually contribute to the system. EVERY query whatever 
+empty or small or large it is will refuse this with ONE. Till you cannot get more data (ERROR CODE = 2)
+
+As for queries, using this calculation above an long term member like MYSELF :P I can do now 14000 queries per day. 
+
+You can become an VIP member by donating to the site, that will give you 5000 queries per day, keep in mind that this number might and can be changed any time.
+
+There is a few cases where the Query number does not decrees and those functions is in regard of submitting data.
+Example of that is when added, Add to user list, Voting.
+
+
+----
+
+How to grab pictures:
+
+To grab pictures you basically link them to how the are stored on the server, Keep in mind that you need to send an BLANK referrer , any other referrer will be blocked and you won't be 
+
+allowed to download the picture.
+
+The pictures are located here:
+
+http://img.mugimugi.org/
+
+So to grab big covers
+
+http://img.mugimugi.org/big/(ID/2000)/ID.jpg
+
+First and foremost this is not an exact URL, the ID/2000 is an Floor calculation, basically you want an number rounded DOWN. Lets say you want the picture from the book who have the ID 200.
+You basically take 200/2000 = 0,1 but rounded down so 0. In other words the URL will become
+http://img.mugimugi.org/big/0/200.jpg
+Same goes for example you want cover of file with ID 35555 you do 35555/2000 = 17,7775, so 17. The URL in this case will be
+http://img.mugimugi.org/big/17/35555.jpg
+
+If the picture does not exist it will redirect and grab this http://img.mugimugi.org/nobig.gif for big and no.gif for tiny ones.
+
+to grab tiny ones replace "big" with "tn".
+
+
+Every query who is not an error will return at least example
+<?xml version="1.0" encoding="UTF-8"?>
+<LIST>
+  <USER id="{ID}">
+    <User>{USERNAME}</User>
+    <Queries>[QUERIES}</Queries>
+  </USER>
+</LIST>
+
+This is
+ID: Your USER ID.
+USERNAME: your DB user name
+QUERIES: number of queries left after this query.
+
+
+How to QUERY it.
+URL to query is the following
+http://doujinshi.mugimugi.org/api/{APIKEY}/
+example
+http://doujinshi.mugimugi.org/api/5a5ba56ca5a/    (This one won't work but is valid you can test it :P )
+
+You will get the following response thought:
+<?xml version="1.0" encoding="UTF-8"?>
+<LIST>
+  <ERROR code="1">
+    <TYPE>An error has occurred</TYPE>
+    <EXACT>WRONG API KEY!</EXACT>
+    <CODE>1</CODE>
+  </ERROR>
+</LIST>
+
+The response above is basically the systems way to throw errors at you, ( there is a few possible bugs left that could throw non standard XML.... will try to kill em off eventually )
+
+Here is a list of KNOWN error codes:
+0: Unknown error ( Lots of possible things could have happened )
+1: Wrong API key.
+2: No Queries left.
+3: No Image Uploaded ( Image search)
+4: Picture to big (Image Search)
+5: No Image (Image Search)
+6: Image search server down
+7: No data received from image search
+8: User not found ( for queries )
+9: Wrong 'ID'.
+10: No Object with that ID
+11: No valid score/Or no score.
+....
+
+
+Returned QUERY example
+
+<?xml version="1.0" encoding="UTF-8"?>
+<LIST>
+  <BOOK ID="B380527" VER="2" search="30,35%">
+    <NAME_EN>GGM -GAINA GIRL MIX-</NAME_EN>
+    <NAME_JP>GGM -GAINA GIRL MIX-</NAME_JP>
+    <NAME_R></NAME_R>
+    <DATE_RELEASED>2010-12-31</DATE_RELEASED>
+    <DATA_ISBN></DATA_ISBN>
+    <DATA_PAGES>24</DATA_PAGES>
+    <DATA_AGE>1</DATA_AGE>
+    <DATA_ANTHOLOGY>0</DATA_ANTHOLOGY>
+    <DATA_LANGUAGE>3</DATA_LANGUAGE>
+    <DATA_COPYSHI>0</DATA_COPYSHI>
+    <DATA_MAGAZINE>0</DATA_MAGAZINE>
+    <DATA_INFO></DATA_INFO>
+    <LINKS>
+      <ITEM ID="G18" VER="1" TYPE="genre" FRQ="0">
+        <NAME_EN>Illustration</NAME_EN>
+        <NAME_JP>イラスト</NAME_JP>
+        <NAME_R></NAME_R>
+        <OBJECTS>772</OBJECTS>
+      </ITEM>
+      <ITEM ID="K76" VER="2" TYPE="contents" FRQ="0">
+        <NAME_EN>Color</NAME_EN>
+        <NAME_JP>カラーページ</NAME_JP>
+        <NAME_R></NAME_R>
+        <OBJECTS>1393</OBJECTS>
+      </ITEM>
+      <ITEM ID="P1960" VER="5" TYPE="parody" FRQ="0">
+        <NAME_EN>Various (need specifying)</NAME_EN>
+        <NAME_JP>よろず</NAME_JP>
+        <NAME_R></NAME_R>
+        <OBJECTS>211</OBJECTS>
+        <NAME_ALT>他</NAME_ALT>
+      </ITEM>
+      <ITEM ID="P2501" VER="8" TYPE="parody" FRQ="0">
+        <NAME_EN>Panty &amp; Stocking with Garterbelt</NAME_EN>
+        <NAME_JP>パンティ&amp;ストッキングwithガーターベルト</NAME_JP>
+        <NAME_R>パンティアンドストッキングウィズガーターベルト</NAME_R>
+        <OBJECTS>53</OBJECTS>
+        <NAME_ALT>Panty</NAME_ALT>
+        <NAME_ALT>パンティ＆ストッキングwithガーターベルト</NAME_ALT>
+      </ITEM>
+      <ITEM ID="N869" VER="1" TYPE="convention" FRQ="0">
+        <NAME_EN>Comic Market 79</NAME_EN>
+        <NAME_JP>コミックマーケット79</NAME_JP>
+        <NAME_R>コミックマーケット79</NAME_R>
+        <OBJECTS>6654</OBJECTS>
+        <NAME_ALT>Comiket 79</NAME_ALT>
+        <NAME_ALT>C79</NAME_ALT>
+        <DATE_START>2010-12-29</DATE_START>
+        <DATE_END>2010-12-31</DATE_END>
+      </ITEM>
+      <ITEM ID="L3" VER="2" TYPE="publisher" FRQ="0">
+        <NAME_EN>No Publisher</NAME_EN>
+        <NAME_JP>出版社なし</NAME_JP>
+        <NAME_R></NAME_R>
+        <OBJECTS>209529</OBJECTS>
+      </ITEM>
+      <ITEM ID="O2" VER="4" TYPE="collections" FRQ="0">
+        <NAME_EN>No Collections</NAME_EN>
+        <NAME_JP>シリーズでない</NAME_JP>
+        <NAME_R></NAME_R>
+        <OBJECTS>36107</OBJECTS>
+      </ITEM>
+      <ITEM ID="I2" VER="2" TYPE="imprint" FRQ="0">
+        <NAME_EN>No Imprint</NAME_EN>
+        <NAME_JP>レーベルなし</NAME_JP>
+        <NAME_R></NAME_R>
+        <OBJECTS>44560</OBJECTS>
+      </ITEM>
+      <ITEM ID="T1" VER="1" TYPE="type" FRQ="0">
+        <NAME_EN>Doujinshi</NAME_EN>
+        <NAME_JP>同人誌</NAME_JP>
+        <NAME_R></NAME_R>
+        <OBJECTS>203651</OBJECTS>
+      </ITEM>
+      <ITEM ID="C10645" VER="2" TYPE="circle" PARENT="0" FRQ="2">
+        <NAME_EN>Techno Fuyuno</NAME_EN>
+        <NAME_JP>テクノフユノ</NAME_JP>
+        <NAME_R>テクノフユノ</NAME_R>
+        <OBJECTS>11</OBJECTS>
+      </ITEM>
+      <ITEM ID="C14451" VER="1" TYPE="circle" PARENT="0" FRQ="2">
+        <NAME_EN>TABLET</NAME_EN>
+        <NAME_JP>TABLET</NAME_JP>
+        <NAME_R></NAME_R>
+        <OBJECTS>8</OBJECTS>
+      </ITEM>
+      <ITEM ID="A18137" VER="2" TYPE="author" PARENT="0" FRQ="2">
+        <NAME_EN>Fuyuno Haruaki</NAME_EN>
+        <NAME_JP>ふゆの春秋</NAME_JP>
+        <NAME_R></NAME_R>
+        <OBJECTS>16</OBJECTS>
+      </ITEM>
+      <ITEM ID="A1184" VER="2" TYPE="author" PARENT="0" FRQ="2">
+        <NAME_EN>Ginta</NAME_EN>
+        <NAME_JP>ぎん太</NAME_JP>
+        <NAME_R></NAME_R>
+        <OBJECTS>39</OBJECTS>
+      </ITEM>
+      <ITEM ID="A1434" VER="4" TYPE="author" PARENT="0" FRQ="2">
+        <NAME_EN>Usami Rui</NAME_EN>
+        <NAME_JP>ウサミルイ</NAME_JP>
+        <NAME_R>ウサミルイ</NAME_R>
+        <OBJECTS>21</OBJECTS>
+      </ITEM>
+      <ITEM ID="P27" VER="13" TYPE="parody" FRQ="0">
+        <NAME_EN>Shinseiki Evangelion</NAME_EN>
+        <NAME_JP>新世紀エヴァンゲリオン</NAME_JP>
+        <NAME_R>しんせいきエヴァンゲリオン</NAME_R>
+        <OBJECTS>1681</OBJECTS>
+        <NAME_ALT>Evangelion</NAME_ALT>
+        <NAME_ALT>NGE</NAME_ALT>
+        <NAME_ALT>Neon Genesis Evangelion</NAME_ALT>
+        <NAME_ALT>Eva</NAME_ALT>
+      </ITEM>
+    </LINKS>
+  </BOOK>
+</LIST>
+
+
+This is an example return of an 'NORMAL' BOOK object, most of this won't need explanation except the ID codes, this is required to figure out what type of ITEM in question it is. Also LINKS 
+
+is basically what the data contain.
+
+Only CIRCLE and AUTHOR have 'PARENT' listed to them, basically if PARENT is not 0 it means that it's just an linked alternate name of another object.
+
+The search="25,5%" part is ONLY there if you did an 'IMAGE' query, if you didn't do one this field is not there at all.
+
+And if your just queering CONTENT and not BOOKS, your return will look something like this:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<LIST>
+  <ITEM ID="C9" VER="2" TYPE="circle" PARENT="0">
+    <NAME_EN>Electromagnetic Wave</NAME_EN>
+    <NAME_JP>Electromagnetic Wave</NAME_JP>
+    <NAME_R>エレクトロマグネティックウ</NAME_R>
+    <OBJECTS>64</OBJECTS>
+    <LINKS>
+      <ITEM ID="K224" VER="2" TYPE="contents">
+        <NAME_EN>Magical Girl</NAME_EN>
+        <NAME_JP>魔法少女</NAME_JP>
+        <NAME_R></NAME_R>
+        <OBJECTS>134</OBJECTS>
+      </ITEM>
+      <ITEM ID="K171" VER="6" TYPE="contents">
+        <NAME_EN>Swimsuit (School)</NAME_EN>
+        <NAME_JP>スクール水着</NAME_JP>
+        <NAME_R></NAME_R>
+        <OBJECTS>602</OBJECTS>
+        <NAME_ALT>スク水</NAME_ALT>
+        <NAME_ALT>Mizugi</NAME_ALT>
+      </ITEM>
+      <ITEM ID="K16" VER="2" TYPE="contents">
+        <NAME_EN>Swimsuit</NAME_EN>
+        <NAME_JP>水着一般 （女性用）</NAME_JP>
+        <NAME_R></NAME_R>
+        <OBJECTS>2372</OBJECTS>
+      </ITEM>
+      <ITEM ID="K11" VER="6" TYPE="contents">
+        <NAME_EN>Breasts (Flat Chest)</NAME_EN>
+        <NAME_JP>貧乳</NAME_JP>
+        <NAME_R>ヒンニュウ</NAME_R>
+        <OBJECTS>100</OBJECTS>
+        <NAME_ALT>Petanko</NAME_ALT>
+        <NAME_ALT>Hinnyuu</NAME_ALT>
+      </ITEM>
+      <ITEM ID="A8" VER="3" TYPE="author" PARENT="0">
+        <NAME_EN>POP</NAME_EN>
+        <NAME_JP>POP</NAME_JP>
+        <NAME_R></NAME_R>
+        <OBJECTS>125</OBJECTS>
+      </ITEM>
+    </LINKS>
+  </ITEM>
+</LIST>
+
+
+Doesn't require much explanation in the end.
+
+
+DATA explanation :
+
+
+
+The ID codes are as following:
+B: BOOK
+C: Circle
+A: Author
+P: Parody
+H: Character
+N: Convention
+O: Collections
+K: Content
+G: Genre
+T: Type
+L: Publisher
+I: Imprint
+The number after the CODE is the 'ID' of the object itself, it still need the TYPE ID wich is the first letter.
+
+
+COPYBOOK, AGE, ANTHOLOGY
+0 = No ( or is not true )
+1 = Yes aka is true ( for AGE it means ADULT BOOK )
+
+Language: This is what language the books are dependent on the number:
+1 = Unknown
+2 = English
+3 = Japanese
+4 = Chinese
+5 = Korean
+6 = French
+7 = German
+8 = Spanish
+9 = Italian
+10 = Russian
+
+FRQ: Frequency, aka how common things are.
+This shows up on 'DATA' types for books when querying those.
+
+For AUTHOR, and CIRCLES thees are the following ( A, C )
+0 = Not Set
+1 = Guest
+2 = Main
+
+For EVERYTHING else:
+0 = Not Set
+1 = Very few
+2 = Some
+3 = Many
+4 = Most
+5 = All
+
+
+
+How to query the database:
+Everything here is just the same as the API URL above with this added to it. as example
+http://doujinshi.mugimugi.org/api/5a5ba56ca5a/?S=getID&ID=B355
+
+?S=getID&ID={ID}      //Get a singmle ID of object example
+?S=getID&ID=B355	or ?S=getID&ID=C355    (First get Book with ID 355, second Circle with ID 355)
+
+You can add MULTIPLE as well, Use , as an separator, you can queries EVERY type at the same time.
+EG ?S=getID&ID=B355,C35,A56,P56,B366
+
+MAX 100 queries at once, if sent in more, the rest will be ignored.
+
+
+Image query:
+?S=imageSearch
+Thats the simple URL, whats next is that you need to send the image as POST data.
+enctype= multipart/form-data 
+And the name of the IMAGE sent need to be "img"
+
+You will get up to 100 book data WITH the search="xxx%" added data so you can see the frequency data.
+
+There is a few extra parameters you can use
+if you want to search with forced gray scale or forced colors. By default it auto detect if it's gray scale or not.
+&colors=3 For Forced Colors
+&colors=1 For Forced Gray scale
+Any other parameters then the above it set to forced colors.
+
+
+------------------------------------
+--- ADVANCED SEARCH QUERIES --------
+------------------------------------
+
+
+Time for some advanced search queries, this is to actually do searches in the db, the first two is just to grab things directly straight out of the db. Keep in mind that it will still list 
+
+just the 25 first queries, however there is ways to grab the next 25 queries here as well, read more below for that.
+
+First of Item search
+
+?S=itemSearch&T=circle
+
+First of to mention here, when doing ITEM search you need to specify type, &T=
+The flowing types exists:
+circle
+author
+parody
+character
+contents
+genre
+convention
+collections
+publisher
+imprint
+
+That is the basic of the search and the minimum requirement but from here on there is some more options.
+First of list order:
+&order=title
+
+By default it always list by title, but you have more options:
+title
+jtitle
+objects
+changed
+
+Also you can do an Ascending or descending search, by default it's Ascending.
+&flow=ASC
+the options are
+ASC			(Ascending)
+DESC			(Descending)
+
+
+Now to actually ask question, first of to query the title:
+&sn=(SEARCHQUERY)
+and an example
+?S=itemSearch&T=circle&sn=test
+this will query the db for all circles who have the word 'test' in it.
+
+You can also query date, keep in mind that the date need to be in
+YYYY-MM-DD format, and that date only apply to convention, you can always query it but you will get zero result.
+&date={DATE}
+
+You can also query the db for whoever added the item to the db.
+&cont={USERNAME}
+example for the site owner
+&cont=MugiMugi
+
+That covers pretty much exactly everything there is to querying a db. Here is example a query who will list ALL circles with the name sakura from the contributor MugiMugi in descending 
+
+Japanese order.
+?S=itemSearch&T=circle&sn=sakura&cont=MugiMugi&order=jtitle&flow=DESC
+
+
+And lastly if there is more then 25 queries you can get the 'n'th page by adding an page to the query as well. By default it's always 1, example of this 
+&page=5 ( will grab the 5th page of 25 items... if there is that many or else return nothing ).
+
+
+----- OBJECT SEARCH QUEERING -------
+
+This is how you query the objects in the db.
+?S=objectSearch
+
+Thats the MINIMUM REQUIREMENT!.
+
+
+
+That is the basic of the search and the minimum requirement but from here on there is some more options.
+First of list order:
+&order=title
+
+By default it always list by title, but you have more options:
+title
+jtitle
+changed
+date
+added
+pages
+page_views
+score
+
+Also you can do an Ascending or Decending search, by default it's Ascending.
+&flow=ASC
+the options are
+ASC			(ASCENDING)
+DESC			(DECSENDING)
+
+
+
+Now to actually ask question, first of to query the title:
+&sn=(SEARCHQUERY)
+and an example
+?S=itemSearch&sn=test
+this will query the db for all objects who have the word 'test' in it.
+
+You can also query date, keep in mind that the date need to be in
+YYYY-MM-DD format if you enter just the first date and ignore the second it just search for books released that date, but if you also fill in hte second date it will show the range between 
+
+them
+&date={DATE}
+&date2={DATE}
+example to show between 2008-08-01 to 2008-08-31
+&date=2008-08-01&date2=2008-08-31
+
+
+You can also query the db for whoever added the item to the db.
+&cont={USERNAME}
+example for the site owner
+&cont=MugiMugi
+There is also an contributor query here, this query returns all users who have contributed to the item, not just the original submitter
+&sub={USERNAME}
+
+And lastly if there is more then 25 queries you can get the 'n'th page by adding an page to the query as well. By default it's always 1, example of this 
+&page=5 ( will grab the 5th page of 25 items... if there is that many or else return nothing ).
+
+
+You can also ask the db if it's an Adult book, Anthology or Copybook. These all work the same way, if you leave them out the query is ignored, if you add them you can enter Y or N ( Y= 
+
+Yes, N = No )
+The following queries are
+&age=Y/N 		(18+ books)
+&anth=Y/N		(Anthology)
+&bcopy=Y/N		(copybook)
+example show all adult anthology who ain't copy books
+&age=Y&anth=Y&bcopy=N
+
+---------------------
+CONTENT QUERY:!!!!!!!
+---------------------
+
+This require it's own section on how to query the db with content information. The queering here is the most advanced and probably also going to be the most used one and it requires a bit of 
+
+explanation.
+
+It will work like this http://doujinshi.mugimugi.org/guide/?ID=12 except it have one MINOR MODIFICATION. the query separator is not ENTER it's | 
+so an example of a query like that would be
+&slist={QUESTION}
+
+example the one already listed as the example in the guide abow in this case would be
+	&slist=C:Electro|K:Swimsuit|P:Moetan
+
+
+And now a final mayor query, list all books who have the letter 'a' in it and contain swimsuits and are NOT anthologies and are adult books, and also list the 5th page in the query
+?S=objectSearch&sn=a&age=Y&anth=N&slist=K:Swimsuit&page=5
+
+
+
+------------------------
+SUBMIT DATA QUERIES!!!
+-----------------------
+First of for all submitting data queries it does not take up ANY API queries! So you can do many of this without worrying about your count going down ( it's very little work for the db 
+
+after all )
+
+If an query went 'OK' you will see this msg, 
+
+<UPDATE>
+<STATUS>OK</STATUS>
+</UPDATE>
+
+
+Adding to User List
+--------------------
+This add books to your User book list, keep in mind ONLY books can be added submitting other content will throw an error.
+?S=adduserlist&ID=B25
+
+You can also submit multiple books at the same time to save time and delay. As before you can MAX submit 25 of them, more then that and they will be ignored.
+EG ?S=adduserlist&ID=B355,B366,B666
+
+
+
+Removing user list.
+-------------------
+Removing works the very same way it won't throw an error if it doesn't exist
+?S=deluserlist&ID=B25
+
+and multiple works obviously here as well
+EG ?S=deluserlist&ID=B355,B366,B666
+
+
+Voting
+------------
+To vote it's pretty much the same as above, first of you need to submit your 'score'
+Here is the possible scores you can send
+1= BAD
+2= OK
+3= GOOD
+
+Anything else will be discarded and error thrown.
+Example:
+?S=vote&ID=B25&score=3
+
+You can as well here send in multiple, HOWEVER keep in mind that you can only vote with one value at a time. As well here it's max 25 at a time.
+?S=vote&ID=B25,B26,B29,B55,B77&score=2
+

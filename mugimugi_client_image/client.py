@@ -23,7 +23,6 @@ class MugiMugiImageClient(AsyncContextManager):
 
     @classmethod
     async def get(cls, id_: int, size: Size = Size.BIG) -> Image:
-        print(f"{Constant.API_PATH}/{size.value}/{int(id_/cls.MODULO)}/{id_}.jpg")
         return Image.open(
             BytesIO(
                 (

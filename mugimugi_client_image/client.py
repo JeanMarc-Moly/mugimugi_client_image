@@ -1,11 +1,11 @@
 from __future__ import annotations
-from asyncio.tasks import FIRST_COMPLETED
 
+from asyncio import FIRST_COMPLETED, Task, create_task, wait
 from enum import Enum
 from pathlib import Path
 from types import TracebackType
 from typing import AsyncContextManager, AsyncGenerator, ClassVar, Iterable, Union
-from asyncio import create_task, wait
+
 from httpx import AsyncClient
 
 from .constant import Constant
@@ -39,8 +39,8 @@ class MugiMugiImageClient(AsyncContextManager):
         async def _get(id_: int):
             return id_, await get(id_, size)
 
-        remaining_tasks: set = set()
-        completed_tasks: set = set()
+        remaining_tasks: set[Task] = set()
+        completed_tasks: set[Task] = set()
 
         async def yield_and_wait():
             nonlocal completed_tasks
@@ -69,12 +69,13 @@ class MugiMugiImageClient(AsyncContextManager):
             yield t.result()
 
     @classmethod
-    async def save_many(
-        cls, images: dict[int, Union[str, Path]]
-    ) -> Iterable[int, Path]:
-        async for i, p in cls.get_many(images.keys()):
-            with Path(images[i]).with_suffix(".jpg").open("wb") as f:
+    async def save_many(cls, images: dict[int, Union[str, Path]]) -> dict[int, Path]:
+        saved = {}
+        async for id_, p in cls.get_many(images.keys()):
+            saved[id_] = path = Path(images[id_]).with_suffix(".jpg").resolve()
+            with path.open("wb") as f:
                 f.write(p)
+        return saved
 
     @classmethod
     async def save(

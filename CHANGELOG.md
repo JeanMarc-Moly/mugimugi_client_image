@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.3.0] - 2021-06-28
+
+- add `get_many` & `save_many`
+
 ## [0.2.0] - 2021-06-28
 
 - `get` returns raw bytes instead of Image

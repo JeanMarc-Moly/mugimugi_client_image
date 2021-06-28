@@ -32,7 +32,6 @@ setup(
         "httpcore==0.13.6; python_version >= '3.6'",
         "httpx==0.18.2",
         "idna==3.2",
-        "pillow==8.2.0",
         "rfc3986[idna2008]==1.5.0",
         "sniffio==1.2.0; python_version >= '3.5'",
     ],

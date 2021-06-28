@@ -1,13 +1,11 @@
 from __future__ import annotations
 
 from enum import Enum
-from io import BytesIO
 from pathlib import Path
 from types import TracebackType
 from typing import AsyncContextManager, ClassVar, Union
 
 from httpx import AsyncClient
-from PIL import Image
 
 from .constant import Constant
 
@@ -22,22 +20,20 @@ class MugiMugiImageClient(AsyncContextManager):
     MODULO: ClassVar[int] = Constant.IMAGE_MODULO
 
     @classmethod
-    async def get(cls, id_: int, size: Size = Size.BIG) -> Image:
-        return Image.open(
-            BytesIO(
-                (
-                    await cls.API.get(f"{size.value}/{int(id_/cls.MODULO)}/{id_}.jpg")
-                ).content
-            )
-        )
+    def get_url(cls, id_: int, size: Size):
+        return f"{size.value}/{int(id_/cls.MODULO)}/{id_}.jpg"
+
+    @classmethod
+    async def get(cls, id_: int, size: Size = Size.BIG) -> bytes:
+        return (await cls.API.get(cls.get_url(id_, size))).content
 
     @classmethod
     async def save(
         cls, path: Union[str, Path], id_: int, size: Size = Size.BIG
     ) -> Path:
-        path = Path(path).resolve()
-        (await cls.get(id_, size)).save(path)
-        return path
+        with (path := Path(path).resolve()).open("wb") as f:
+            f.write(await cls.get(id_, size))
+            return path
 
     async def __aenter__(self) -> MugiMugiImageClient:
         await self.API.__aenter__()

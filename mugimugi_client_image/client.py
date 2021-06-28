@@ -20,7 +20,7 @@ class MugiMugiImageClient(AsyncContextManager):
     MODULO: ClassVar[int] = Constant.IMAGE_MODULO
 
     @classmethod
-    def get_url(cls, id_: str, size: Size):
+    def get_url(cls, id_: int, size: Size):
         return f"{size.value}/{int(id_/cls.MODULO)}/{id_}.jpg"
 
     @classmethod

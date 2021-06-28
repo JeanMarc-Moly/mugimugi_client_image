@@ -69,6 +69,14 @@ class MugiMugiImageClient(AsyncContextManager):
             yield t.result()
 
     @classmethod
+    async def save_many(
+        cls, images: dict[int, Union[str, Path]]
+    ) -> Iterable[int, Path]:
+        async for i, p in cls.get_many(images.keys()):
+            with Path(images[i]).with_suffix(".jpg").open("wb") as f:
+                f.write(p)
+
+    @classmethod
     async def save(
         cls, path: Union[str, Path], id_: int, size: Size = Size.BIG
     ) -> Path:

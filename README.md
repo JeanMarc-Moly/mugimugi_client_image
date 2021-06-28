@@ -24,3 +24,27 @@ from mugimugi_client_image import MugiMugiImageClient, Size
 async with MugiMugiImageClient() as c:
     print(await c.save("cover.jpg", OBJECT_ID, Size.SMALL))
 ```
+
+## Get many
+```python
+OBJECT_IDS = range(50000,50050)
+
+from mugimugi_client_image import MugiMugiImageClient, Size
+from pathlib import Path
+
+async with MugiMugiImageClient() as c:
+    async for i, p in c.get_many(OBJECT_IDS):
+        with Path(f"{i}.jpg").open("wb") as f:
+            f.write(p)
+```
+
+## Save many
+```python
+OBJECTS = {1: "local.jpg", 17: "/data/absolute.jpg", 170: "../../Documents/relative.jpg"}
+
+from mugimugi_client_image import MugiMugiImageClient, Size
+from pathlib import Path
+
+async with MugiMugiImageClient() as c:
+    await c.save_many(OBJECTS)
+```

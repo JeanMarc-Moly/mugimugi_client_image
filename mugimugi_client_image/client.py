@@ -4,11 +4,23 @@ from asyncio import FIRST_COMPLETED, Task, create_task, wait
 from enum import Enum
 from pathlib import Path
 from types import TracebackType
-from typing import AsyncContextManager, AsyncGenerator, ClassVar, Iterable, Union
+from typing import (
+    AsyncContextManager,
+    AsyncIterable,
+    AsyncIterator,
+    ClassVar,
+    Iterable,
+    Union,
+)
 
 from httpx import AsyncClient
 
+from ._util import asynchronize
 from .constant import Constant
+
+StrPath = Union[str, Path]
+GreaterIntIterable = Union[Iterable[int], AsyncIterable[int]]
+Saver = tuple[int, StrPath]
 
 
 class Size(Enum):
@@ -30,9 +42,15 @@ class MugiMugiImageClient(AsyncContextManager):
         return (await cls.API.get(cls.get_url(id_, size))).content
 
     @classmethod
+    async def save(cls, path: StrPath, id_: int, size: Size = Size.BIG) -> Path:
+        with (path := Path(path).resolve()).open("wb") as f:
+            f.write(await cls.get(id_, size))
+            return path
+
+    @classmethod
     async def get_many(
-        cls, ids: Iterable[int], size: Size = Size.BIG, parallel: int = PARALLEL
-    ) -> AsyncGenerator[tuple[int, bytes], None]:
+        cls, ids: GreaterIntIterable, size: Size = Size.BIG, parallel: int = PARALLEL,
+    ) -> AsyncIterator[tuple[int, bytes]]:
 
         get = cls.get
 
@@ -53,7 +71,7 @@ class MugiMugiImageClient(AsyncContextManager):
                 remaining_tasks, return_when=FIRST_COMPLETED
             )
 
-        for id_ in ids:
+        async for id_ in asynchronize(ids):
             remaining_tasks.add(create_task(_get(id_)))
 
             if not (parallel := parallel - 1):
@@ -69,21 +87,26 @@ class MugiMugiImageClient(AsyncContextManager):
             yield t.result()
 
     @classmethod
-    async def save_many(cls, images: dict[int, Union[str, Path]]) -> dict[int, Path]:
+    async def save_many(
+        cls,
+        images: Union[Iterable[Saver], AsyncIterable[Saver]],
+        size: Size = Size.BIG,
+        parallel: int = PARALLEL,
+    ) -> dict[int, Path]:
         saved = {}
-        async for id_, p in cls.get_many(images.keys()):
-            saved[id_] = path = Path(images[id_]).with_suffix(".jpg").resolve()
-            with path.open("wb") as f:
-                f.write(p)
-        return saved
 
-    @classmethod
-    async def save(
-        cls, path: Union[str, Path], id_: int, size: Size = Size.BIG
-    ) -> Path:
-        with (path := Path(path).resolve()).open("wb") as f:
-            f.write(await cls.get(id_, size))
-            return path
+        async def dictionize():
+            nonlocal saved
+            async for id_, p in asynchronize(images):
+                saved[id_] = Path(p).with_suffix(".jpg").resolve()
+                yield id_
+
+        # TODO: handle async images generator slower than image retrieval
+        async for id_, raw in cls.get_many(dictionize(), size, parallel):
+            with saved[id_].open("wb") as f:
+                f.write(raw)
+
+        return saved
 
     async def __aenter__(self) -> MugiMugiImageClient:
         await self.API.__aenter__()

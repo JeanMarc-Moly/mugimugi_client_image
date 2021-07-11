@@ -1,1 +1,1 @@
-from .client import MugiMugiImageClient, Size
+from .client import MugiMugiImageClient, Repository

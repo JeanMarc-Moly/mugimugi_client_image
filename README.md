@@ -40,11 +40,12 @@ async with MugiMugiImageClient() as c:
 
 ## Save many
 ```python
-OBJECTS = {1: "local.jpg", 17: "/data/absolute.jpg", 170: "../../Documents/relative.jpg"}
+OBJECTS = {1: "local.jpg", 17: "/absolute.jpg", 170: "../../Documents/relative.jpg"}
 
 from mugimugi_client_image import MugiMugiImageClient, Size
 from pathlib import Path
 
 async with MugiMugiImageClient() as c:
-    await c.save_many(OBJECTS)
+    async for p in c.save_many(OBJECTS.items()):
+        print(p)
 ```

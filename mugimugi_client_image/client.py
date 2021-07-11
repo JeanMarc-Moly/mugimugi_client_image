@@ -64,7 +64,7 @@ class MugiMugiImageClient(AsyncContextManager):
         cls,
         images: Union[Iterable[Saver], AsyncIterable[Saver]],
         size: Size = Size.BIG,
-    ) -> dict[int, Path]:
+    ) -> AsyncIterator[tuple[int, Path]]:
         saved = {}
 
         async def dictionize():
@@ -75,10 +75,9 @@ class MugiMugiImageClient(AsyncContextManager):
 
         # TODO: handle async images generator slower than image retrieval
         async for id_, raw in cls.get_many(dictionize(), size):
-            with saved[id_].open("wb") as f:
+            with (path := saved[id_]).open("wb") as f:
                 f.write(raw)
-
-        return saved
+                yield id_, path
 
     async def __aenter__(self) -> MugiMugiImageClient:
         await self.API.__aenter__()

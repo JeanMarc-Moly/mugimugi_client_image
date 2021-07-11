@@ -22,9 +22,10 @@ GreaterIntIterable = Union[Iterable[int], AsyncIterable[int]]
 Saver = tuple[int, StrPath]
 
 
-class Size(Enum):
-    BIG = "big"
-    SMALL = "tn"
+class Repository(Enum):
+    COVER_BIG = "big"
+    COVER_SMALL = "tn"
+    SAMPLE = "imagdb"
 
 
 class MugiMugiImageClient(AsyncContextManager):
@@ -34,22 +35,24 @@ class MugiMugiImageClient(AsyncContextManager):
     RETRY: ClassVar[int] = Constant.FAILURE_RETRY
 
     @classmethod
-    def get_url(cls, id_: int, size: Size):
+    def get_url(cls, id_: int, size: Repository):
         return f"{size.value}/{int(id_/cls.MODULO)}/{id_}.jpg"
 
     @classmethod
-    async def get(cls, id_: int, size: Size = Size.BIG) -> bytes:
+    async def get(cls, id_: int, size: Repository = Repository.COVER_BIG) -> bytes:
         return (await cls.API.get(cls.get_url(id_, size))).content
 
     @classmethod
-    async def save(cls, path: StrPath, id_: int, size: Size = Size.BIG) -> Path:
+    async def save(
+        cls, path: StrPath, id_: int, size: Repository = Repository.COVER_BIG
+    ) -> Path:
         with (path := Path(path).resolve()).open("wb") as f:
             f.write(await cls.get(id_, size))
             return path
 
     @classmethod
     async def get_many(
-        cls, ids: GreaterIntIterable, size: Size = Size.BIG,
+        cls, ids: GreaterIntIterable, size: Repository = Repository.COVER_BIG,
     ) -> AsyncIterator[tuple[int, bytes]]:
         async def _get(id_: int) -> tuple[int, bytes]:
             return id_, await cls.get(id_, size)
@@ -63,7 +66,7 @@ class MugiMugiImageClient(AsyncContextManager):
     async def save_many(
         cls,
         images: Union[Iterable[Saver], AsyncIterable[Saver]],
-        size: Size = Size.BIG,
+        size: Repository = Repository.COVER_BIG,
     ) -> AsyncIterator[tuple[int, Path]]:
         saved = {}
 
